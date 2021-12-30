@@ -1,0 +1,6 @@
+A remote Redis.io based object store used as a cache.
+
+Define and implement an interface on Redis object serialization using  
+"encoding/gob" standard package.
+
+https://go.dev/blog/gob
