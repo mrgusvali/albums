@@ -5,21 +5,24 @@ import (
     "net/http"
     "fmt"
     "github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"    
 )
 
 
 var repo Repo
 
 func main() {
-    //http.HandleFunc("/", defaultHandler)
-    //http.ListenAndServe(":8080", nil)
-    
     repo = Repo{Database: "margus", Username: "margus", Password: "margus"}
     
     router := gin.Default()
+    router.GET("/", defaultPage)
     router.GET("/albums", getAlbums)
     router.POST("/albums", postAlbums)    
     router.GET("/albums/:id", getAlbumByID)
+    
+    // all cross origins, incl. the stand by react-app
+    // see https://github.com/gin-contrib/cors
+	router.Use(cors.Default()) // TODO:
     
     router.Run("localhost:8080")
     
@@ -40,7 +43,9 @@ func defaultPage(c *gin.Context) {
 func getAlbums(c *gin.Context) {
 	//albums := repo.FindAll()
 	
-fmt.Printf("blaah %s ", c.Query("price"))
+    // Add CORS headers
+    c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+    c.Header("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS")	
 
 	qInt := func (c *gin.Context, name string) int {
 		i,_ := strconv.Atoi(c.Query(name))
