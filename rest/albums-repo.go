@@ -116,7 +116,7 @@ func (r Repo) query(q QueryCriteria) []Album {
 	if q.Artist != "" {
 		m = m.Where("lower(artist) like ?", toLowcaseMatcher(q.Artist))
 	}
-	if len(q.Price) > 0 {
+	if len(q.Price) > 0 && q.Price[1] > 0{
 		m = m.Where("price between ? and ?", q.Price[0], q.Price[1])
 	}
 	if q.Offset > 0 {

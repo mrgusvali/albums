@@ -52,7 +52,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-	  filterCriteria: {title:"", artist:"", offset:0},
+	  filterCriteria: {t:"", a:"", offset:0},
 	  loadedState: {
         error: null,
         isLoaded: false,
@@ -70,7 +70,9 @@ class App extends React.Component {
 	let opts = {
 		method: 'GET'
 	}
-    fetch('http://localhost:8080/albums?t=modern&a=Betty&price:lt=123', opts)
+	var url = 'http://localhost:8080/albums?' + new URLSearchParams(criteria).toString()
+	console.log("url ", url)
+    fetch(url, opts)
       .then(res => res.json())
       .then(
         (result) => {
