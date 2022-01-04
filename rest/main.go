@@ -5,25 +5,27 @@ import (
     "net/http"
     "fmt"
     "github.com/gin-gonic/gin"
-	"github.com/gin-contrib/cors"    
+	"github.com/gin-contrib/cors"   
+    "github.com/mrgusvali/rediscli"
 )
 
 
 var repo Repo
+var cache rediscli.Cache
 
 func main() {
     repo = Repo{Database: "margus", Username: "margus", Password: "margus"}
-    
+    cache = rediscli.NewCache()    
     router := gin.Default()
-    router.GET("/", defaultPage)
-    router.GET("/albums", getAlbums)
-    router.POST("/albums", postAlbums)    
-    router.GET("/albums/:id", getAlbumByID)
     
     // all cross origins, incl. the stand by react-app
     // see https://github.com/gin-contrib/cors
 	router.Use(cors.Default()) // TODO:
-    
+	    
+    router.GET("/", defaultPage)
+    router.GET("/albums", getAlbums)
+    router.POST("/albums", postAlbums)    
+    router.GET("/albums/:id", getAlbumByID)
     router.Run("localhost:8080")
     
     repo.Close()
@@ -41,12 +43,6 @@ func defaultPage(c *gin.Context) {
 //    paging, ranges, etc.
 // here, price=gt:10&price=lt:20  is implemented
 func getAlbums(c *gin.Context) {
-	//albums := repo.FindAll()
-	
-    // Add CORS headers
-    c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
-    c.Header("Access-Control-Allow-Methods", "PUT, POST, GET, DELETE, OPTIONS")	
-
 	qInt := func (c *gin.Context, name string) int {
 		i,_ := strconv.Atoi(c.Query(name))
 		return i
@@ -61,13 +57,15 @@ func getAlbums(c *gin.Context) {
 		Price: []float64{qFloat(c, "price:gt"),qFloat(c, "price:lt")},
 		Limit: qInt(c, "limit"), Offset: qInt(c, "offset")}
 	
-	albums := repo.query(q)
-	
-	// cache these in Redis
+	// cached these?
 	key := q.calcKey()
 	fmt.Println("key=" + key)
 	
-	
+	var albums []Album
+	if !cache.Get(key, &albums) {
+		albums = repo.query(q)
+		cache.Put(key, albums)
+	}
 	
 	c.IndentedJSON(http.StatusOK, albums)
 }

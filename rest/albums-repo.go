@@ -7,8 +7,8 @@ import (
     "github.com/go-pg/pg/v10"
 )
 
+// Album represents data about a record Album -- the business object.
 // loosely around https://go.dev/doc/tutorial/web-service-gin
-// Album represents data about a record Album.
 type Album struct {
     Id     int  `json:"id" pg:",pk"` 
     Title  string  `json:"title"`
@@ -16,6 +16,7 @@ type Album struct {
     Price  float64 `json:"price"`
 }
 
+// filter form for query
 type QueryCriteria struct {
 	Title string
 	Artist string
